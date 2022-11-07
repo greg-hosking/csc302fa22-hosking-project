@@ -41,8 +41,8 @@ $routes = [
 
   // Lots.
   // For testing directly in the browser...
-  // makeRoute("GET", "#^/router.php/lots/?(\?.*)?$#", "getLots"),
-  makeRoute("GET", "#^/lots/?(\?.*)?$#", "getLots"),
+  makeRoute("GET", "#^/router.php/lots/?(\?.*)?$#", "getLots"),
+  // makeRoute("GET", "#^/lots/?(\?.*)?$#", "getLots"),
 
 
 ];
