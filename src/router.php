@@ -40,7 +40,9 @@ $routes = [
   // Attendants.
 
   // Lots.
-  makeRoute("GET", "#^/router.php/lots/?(\?.*)?$#", "getLots"),
+  // For testing directly in the browser...
+  // makeRoute("GET", "#^/router.php/lots/?(\?.*)?$#", "getLots"),
+  makeRoute("GET", "#^/lots/?(\?.*)?$#", "getLots"),
 
 
 ];
