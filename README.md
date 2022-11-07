@@ -21,7 +21,7 @@ View the website live on DigDug here: <a href="https://digdug.cs.endicott.edu/~g
 
 <b>API</b><br>
 Here is a list of currently supported API endpoints:
-- GET /lots -> list of all parking lots
+- `GET /lots` -> list of all parking lots
 
 <b>Data Model</b><br>
 See diagrams.pdf...
