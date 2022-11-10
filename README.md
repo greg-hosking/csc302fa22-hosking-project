@@ -24,4 +24,4 @@ Here is a list of currently supported API endpoints:
 - `GET /lots` -> list of all parking lots
 
 <b>Data Model</b><br>
-See diagrams.pdf for a detailed ER model. The data in the diagram will be stored in an SQLite database on the server. Data that will be maintained on the client side includes auth tokens and user preferences (last entered address, etc). 
+See diagrams.pdf for a detailed ER model. The data in the diagram (attendants, lots, lot attendants, etc) will be stored in an SQLite database on the server. Data that will be maintained on the client side includes auth tokens (in session/local storage) and user preferences (last entered address, etc) (in local storage). 
