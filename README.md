@@ -7,11 +7,11 @@ This project is a web application that allows parking lot attendants to manage a
 View the website live on DigDug here: <a href="https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project/src/">https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project/src/</a> 
 
 <b>Files</b><br>
-- diagrams.pdf contains ER models and wireframes,
-- src/index.html is the home HTML file that has the front end for the prototype,
-- src/rest-utils.php has some utility functions for the back end,
-- src/router.php is the main router for the back end that handles API requests,
-- src/data.db is the SQLite database file
+- `diagrams.pdf` contains ER models and wireframes,
+- `src/index.html` is the home HTML file that has the front end for the prototype,
+- `src/rest-utils.php` has some utility functions for the back end,
+- `src/router.php` is the main router for the back end that handles API requests,
+- `src/data.db` is the SQLite database file
 
 <b>Features</b><br>
 - Account management (25%),
@@ -24,4 +24,4 @@ Here is a list of currently supported API endpoints:
 - `GET /lots` -> list of all parking lots
 
 <b>Data Model</b><br>
-See diagrams.pdf...
+See diagrams.pdf for a detailed ER model. The data in the diagram will be stored in an SQLite database on the server. Data that will be maintained on the client side includes tokens and user preferences (last entered address, etc). 
