@@ -109,12 +109,15 @@ function createTables()
 
   try {
     // Attendants
+    // TODO: add encrypted password reset code...
     $dbh->exec(
       'CREATE TABLE IF NOT EXISTS Attendants(
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
         email TEXT NOT NULL, 
         encryptedPassword TEXT NOT NULL)'
     );
+
+    // TODO: create sessions table...
 
     // Lots
     $dbh->exec(
@@ -160,6 +163,88 @@ function createTables()
     error("There was an error creating the tables: $e");
   }
 }
+
+
+
+function authenticate($username, $password)
+{
+  global $dbh;
+
+  // check that username and password are not null.
+  if ($username == null || $password == null) {
+    error('Bad request -- both a username and password are required');
+  }
+
+  // grab the row from Users that corresponds to $username
+  try {
+    $statement = $dbh->prepare('select password from Users ' .
+      'where username = :username');
+    $statement->execute([
+      ':username' => $username,
+    ]);
+    $passwordHash = $statement->fetch()[0];
+
+    // user password_verify to check the password.
+    if (password_verify($password, $passwordHash)) {
+      return true;
+    }
+    error('Could not authenticate username and password.', 401);
+
+
+  } catch (Exception $e) {
+    error('Could not authenticate username and password: ' . $e);
+  }
+}
+
+/**
+ * Checks if the user is signed in; if not, emits a 403 error.
+ */
+function mustBeSignedIn()
+{
+  if (!(key_exists('signedin', $_SESSION) && $_SESSION['signedin'])) {
+    error("You must be signed in to perform that action.", 403);
+  }
+}
+
+/**
+ * Log a user in. Requires the parameters:
+ *  - username
+ *  - password
+ * 
+ * @param data An JSON object with these fields:
+ *               - success -- whether everything was successful or not
+ *               - error -- the error encountered, if any (only if success is false)
+ */
+function signin($data)
+{
+  if (authenticate($data['username'], $data['password'])) {
+    $_SESSION['signedin'] = true;
+    $_SESSION['user-id'] = getUserByUsername($data['username'])['id'];
+    $_SESSION['username'] = $data['username'];
+
+    die(json_encode([
+      'success' => true
+    ]));
+  } else {
+    error('Username or password not found.', 401);
+  }
+}
+
+/**
+ * Logs the user out if they are logged in.
+ * 
+ * @param data An JSON object with these fields:
+ *               - success -- whether everything was successful or not
+ *               - error -- the error encountered, if any (only if success is false)
+ */
+function signout($data)
+{
+  session_destroy();
+  die(json_encode([
+    'success' => true
+  ]));
+}
+
 
 function createMockData()
 {
