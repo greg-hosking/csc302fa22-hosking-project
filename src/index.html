@@ -17,6 +17,38 @@
   </head>
   <body>
     <script>
+      $(document).ready(() => {
+        const sessionEmail = sessionStorage.getItem('email');
+        const sessionSignedIn = sessionStorage.getItem('signedIn');
+
+        if (
+          sessionEmail !== null &&
+          sessionSignedIn !== null &&
+          sessionSignedIn == 'true'
+        ) {
+          $('#your-parking-lots-link').removeClass('d-none');
+          $('#sign-out-link').removeClass('d-none');
+          $('#sign-in-link').addClass('d-none');
+        } else {
+          $('#your-parking-lots-link').addClass('d-none');
+          $('#sign-out-link').addClass('d-none');
+          $('#sign-in-link').removeClass('d-none');
+        }
+      });
+
+      function signOut() {
+        $.ajax('/sessions', {
+          method: 'POST',
+          data: {
+            _method: 'DELETE',
+          },
+        });
+
+        // Remove the email and signed in status from session storage.
+        sessionStorage.removeItem('email');
+        sessionStorage.removeItem('signedIn');
+      }
+
       async function saveAddress(event) {
         // Prevent the form from being submitted as it normally would.
         event.preventDefault();
