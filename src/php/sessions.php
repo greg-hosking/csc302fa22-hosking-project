@@ -8,8 +8,8 @@ $dbh = initPDO();
 /**
  * Handles `POST` requests made to `/sessions`. Requires two keys in `$params`: email and password.
  * Attempts to sign the user in with the given `email` and `password`.
- * If successful, saves user ID, email, and signed in status in the session and dies with `200 OK`.
- * If unsuccessful, dies with `400 Bad Request`, `401 Unauthorized`, or `404 Not Found`.
+ * If successful, saves user ID, email, and signed in status in the session and emits a `200 OK` response.
+ * If unsuccessful, emits a `400 Bad Request`, `401 Unauthorized`, or `404 Not Found` response.
  */
 function signIn($uri, $matches, $params)
 {
@@ -35,7 +35,7 @@ function signIn($uri, $matches, $params)
 
 /**
  * Handles `DELETE` requests made to `/sessions`.
- * Signs the user out by destroying the session, then dies with `200 OK`.
+ * Signs the user out by destroying the session, then emits a `200 OK` response.
  */
 function signOut($uri, $matches, $params)
 {
