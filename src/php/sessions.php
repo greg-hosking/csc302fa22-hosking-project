@@ -33,6 +33,10 @@ function signIn($uri, $matches, $params)
   unauthorized('Incorrect email or password.');
 }
 
+/**
+ * Handles `DELETE` requests made to `/sessions`.
+ * Signs the user out by destroying the session, then dies with `200 OK`.
+ */
 function signOut($uri, $matches, $params)
 {
   session_destroy();
