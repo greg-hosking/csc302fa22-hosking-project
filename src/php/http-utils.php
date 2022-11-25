@@ -21,18 +21,17 @@ function created($uri, $data)
 {
   http_response_code(201);
   header("Location: $uri");
-  $response = ['success' => true];
-  if (!is_null($data)) {
-    $response['data'] = $data;
-  }
-  die(json_encode($response));
+  die(json_encode([
+    'success' => true,
+    'data' => $data
+  ]));
 }
 
 /**
  * Emits a `400 Bad Request` response with the following JSON object:
  * `{ "success": false, "message": $message (if given) }`
  */
-function badRequest($message)
+function badRequest($message = null)
 {
   http_response_code(400);
   $response = ['success' => false];
@@ -46,7 +45,7 @@ function badRequest($message)
  * Emits a `401 Unauthorized` response with the following JSON object:
  * `{ "success": false, "message": $message (if given) }`
  */
-function unauthorized($message)
+function unauthorized($message = null)
 {
   http_response_code(401);
   $response = ['success' => false];
@@ -60,7 +59,7 @@ function unauthorized($message)
  * Emits a `403 Forbidden` response with the following JSON object:
  * `{ "success": false, "message": $message (if given) }`
  */
-function forbidden($message)
+function forbidden($message = null)
 {
   http_response_code(403);
   $response = ['success' => false];
@@ -74,7 +73,7 @@ function forbidden($message)
  * Emits a `404 Not Found` response with the following JSON object:
  * `{ "success": false, "message": $message (if given) }`
  */
-function notFound($message)
+function notFound($message = null)
 {
   http_response_code(404);
   $response = ['success' => false];
@@ -88,7 +87,7 @@ function notFound($message)
  * Emits a `500 Internal Server Error` response with the following JSON object:
  * `{ "success": false, "message": $message (if given) }`
  */
-function error($message)
+function error($message = null)
 {
   http_response_code(500);
   $response = ['success' => false];
