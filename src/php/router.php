@@ -1,14 +1,16 @@
 <?php
 require 'rest-utils.php';
 
-// Load the requested file, if it exists. (For running PHP in development mode.)
+// Load the requested file, if it exists.
 if (file_exists('.' . $_SERVER['REQUEST_URI'])) {
   return false;
 }
-
-// Enable debugging.
+// Enable error reporting for debugging.
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
+
+header('Content-type: application/json');
+session_start();
 
 // Set up the PDO instance for the database.
 $dbName = 'data.db';
@@ -20,36 +22,47 @@ if (!file_exists($dataDir)) {
   $dataDir = __DIR__;
 }
 $dbh = new PDO("sqlite:$dataDir/$dbName");
-// Set PDO instance to raise exceptions when errors are encountered.
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-header('Content-type: application/json');
 createTables();
 // createMockData();
 
-// Routes.
+// Set up REST API endpoints.
 $routes = [
-  // Books.
-  // makeRoute("POST", "#^/books/?(\?.*)?$#", "addBook"),
-  // makeRoute("GET", "#^/books/?(\?.*)?$#", "getBooks"),
-  // makeRoute("GET", "#^/books/(\w+)/?(\?.*)?$#", "getBook"),
-  // // Patrons -- the handlers for these need to be re-vamped.
-  // makeRoute("POST", "#^/patrons/?(\?.*)?$#", "addPatron"),
-  // makeRoute("GET", "#^/patrons/?(\?.*)?$#", "getPatrons"),
-  // makeRoute("GET", "#^/patrons/(\w+)/?(\?.*)?$#", "getPatron"),
-  // Attendants.
+  // makeRoute("POST", "#^/sessions/?(\?.*)?$#", "signIn"),
+  // makeRoute("DELETE", "#^/sessions/?(\?.*)?$#", "signOut"),
 
+  // Attendants.
+  // ADD USER -- POST
+  // GET USER -- GET (when we make a user, generate password code)
+  // UPDATE USER PASSWORD RESET CODE -- PATCH (when user is updated, generate new code)
+  // UPDATE USER PASSWORD -- PATCH
+
+  // Lots.
+  // ADD LOT -- POST
+  // GET LOTS -- GET
+  // GET LOT -- GET
+  // UPDATE LOT INFO -- PATCH
+  // DELETE LOT -- DELETE
+
+  // OTHER STUFF....
+
+  makeRoute("POST", "#^/sessions/?(\?.*)?$#", "signin"),
+  makeRoute("DELETE", "#^/sessions/?(\?.*)?$#", "signout"),
+  // Attendants.
+  makeRoute("POST", "#^/attendants/?(\?.*)?$#", "addAttendant"),
+  // makeRoute("GET", "#^/attendants/(\w+)/password-reset-code/?(\?.*)?$#", "sendPasswordResetCode"),
   // Lots.
   // For testing directly in the browser...
   makeRoute("GET", "#^/router.php/lots/?(\?.*)?$#", "getLots"),
-  // makeRoute("GET", "#^/lots/?(\?.*)?$#", "getLots"),
+  makeRoute("GET", "#^/router.php/lots/(\w+)/?(\?.*)?$#", "getLot"),
+  makeRoute("GET", "#^/lots/?(\?.*)?$#", "getLots"),
 
 
 ];
 
-// Initial request processing.
-// If this is being served from a public_html folder, find the prefix (e.g., 
-// /~jsmith/path/to/dir).
+// Initial request processing...
+// If this is being served from a public_html folder, find the prefix.
 $matches = [];
 preg_match('#^/~([^/]*)#', $_SERVER['REQUEST_URI'], $matches);
 if (count($matches) > 0) {
@@ -62,9 +75,9 @@ if (count($matches) > 0) {
   $uri = $_SERVER['REQUEST_URI'];
 }
 
-// Get the request method; PHP doesn't handle non-GET or POST requests
-// well, so we'll mimic them with POST requests with a "_method" param
-// set to the method we want to use.
+// Get the request method...
+// PHP does not support requests outside of GET and POST well, so other requests
+// are sent as POST requests with a "_method" param that sets the desired method.
 $method = $_SERVER["REQUEST_METHOD"];
 $params = $_GET;
 if ($method == "POST") {
@@ -85,7 +98,6 @@ foreach ($routes as $route) {
     }
   }
 }
-
 if (!$foundMatchingRoute) {
   error("No route found for: $method $uri");
 }
@@ -108,13 +120,18 @@ function createTables()
   global $dbh;
 
   try {
+
+    // $dbh->exec('DROP TABLE IF EXISTS Attendants');
+
+
+
     // Attendants
-    // TODO: add encrypted password reset code...
     $dbh->exec(
       'CREATE TABLE IF NOT EXISTS Attendants(
         id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        email TEXT NOT NULL, 
-        encryptedPassword TEXT NOT NULL)'
+        email TEXT UNIQUE NOT NULL, 
+        password TEXT NOT NULL,
+        password_reset_code TEXT)'
     );
 
     // TODO: create sessions table...
@@ -166,33 +183,40 @@ function createTables()
 
 
 
-function authenticate($username, $password)
+function authenticate($email, $password)
 {
   global $dbh;
 
-  // check that username and password are not null.
-  if ($username == null || $password == null) {
-    error('Bad request -- both a username and password are required');
+  // check that email and password are not null.
+  if ($email == null || $password == null) {
+    error('Bad request -- both a email and password are required');
   }
 
-  // grab the row from Users that corresponds to $username
+  // grab the row from Users that corresponds to $email
   try {
-    $statement = $dbh->prepare('select password from Users ' .
-      'where username = :username');
+    $statement = $dbh->prepare('select password from Attendants ' .
+      'where email = :email');
     $statement->execute([
-      ':username' => $username,
+      ':email' => $email,
     ]);
-    $passwordHash = $statement->fetch()[0];
+
+    // TODO: clean this up...
+    $result = $statement->fetch();
+    if ($result == false) {
+      notFound('USER DOES NOT EXIST');
+    }
+
+    $passwordHash = $result[0];
 
     // user password_verify to check the password.
     if (password_verify($password, $passwordHash)) {
       return true;
     }
-    error('Could not authenticate username and password.', 401);
+    error('Could not authenticate email and password.', 401);
 
 
   } catch (Exception $e) {
-    error('Could not authenticate username and password: ' . $e);
+    error('User does not exist????: ' . $e);
   }
 }
 
@@ -215,12 +239,12 @@ function mustBeSignedIn()
  *               - success -- whether everything was successful or not
  *               - error -- the error encountered, if any (only if success is false)
  */
-function signin($data)
+function signin($uri, $matches, $params)
 {
-  if (authenticate($data['username'], $data['password'])) {
+  if (authenticate($params['email'], $params['password'])) {
     $_SESSION['signedin'] = true;
-    $_SESSION['user-id'] = getUserByUsername($data['username'])['id'];
-    $_SESSION['username'] = $data['username'];
+    $_SESSION['user-id'] = getUserByUsername($params['email'])['id'];
+    $_SESSION['email'] = $params['email'];
 
     die(json_encode([
       'success' => true
@@ -267,6 +291,37 @@ function createMockData()
 ////////////////////////////////////////////////////////////////////////////////
 // Handlers
 ////////////////////////////////////////////////////////////////////////////////
+
+function addAttendant($uri, $matches, $params)
+{
+  global $dbh;
+
+  $saltedHash = password_hash($params['password'], PASSWORD_BCRYPT);
+  $passwordResetCode = random_int(100000, 999999);
+
+  try {
+    $statement = $dbh->prepare('insert into Attendants(email, password, password_reset_code) ' .
+      'values (:email, :password, :password_reset_code)');
+    $statement->execute([
+      ':email' => $params['email'],
+      ':password' => $saltedHash,
+      ':password_reset_code' => $passwordResetCode,
+    ]);
+
+    $attendantID = $dbh->lastInsertId();
+    created("attendants/$attendantID", [
+      'id' => $attendantID
+    ]);
+
+  } catch (PDOException $e) {
+    http_response_code(400);
+    die(json_encode([
+      'success' => false,
+      'error' => "There was an error adding the user: $e"
+    ]));
+  }
+}
+
 function getLots($uri, $matches, $data)
 {
   global $prefix;
@@ -326,5 +381,27 @@ function getTable($table, $uriPrefix)
 }
 
 
+
+/**
+ * Looks up a user by their username. 
+ * 
+ * @param $email string The username of the user to look up.
+ * @return mixed The user's row in the Users table or null if no user is found.
+ */
+function getUserByUsername($email)
+{
+  global $dbh;
+  try {
+    $statement = $dbh->prepare("select * from Attendants where email = :email");
+    $statement->execute([':email' => $email]);
+    // Use fetch here, not fetchAll -- we're only grabbing a single row, at 
+    // most.
+    $row = $statement->fetch(PDO::FETCH_ASSOC);
+    return $row;
+
+  } catch (PDOException $e) {
+    return null;
+  }
+}
 
 ?>
