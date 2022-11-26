@@ -5,7 +5,10 @@ require_once 'http-utils.php';
 $dbh = initPDO();
 
 /**
- * @TODO: documentation
+ * Handles `POST` requests made to `/attendants`. Requires two keys in `$params`: email and password.
+ * Attempts to create a user with the given `email` and `password`.
+ * If successful, emites a `201 Created` response with the location of the created user.
+ * If unsuccessful, emits a `400 Bad Request` or `404 Not Found` response.
  */
 function addAttendant($uri, $matches, $params)
 {
@@ -36,7 +39,10 @@ function addAttendant($uri, $matches, $params)
 }
 
 /**
- * @TODO: documentation
+ * Handles `GET` requests made to `/attendants`. Optional key in `$params`: email.
+ * Attempts to get all attendants or the attendant with the given email (if present).
+ * If successful, emits a `200 OK` response with the attendant data (excluding confidential info).
+ * If unsuccessful, emits a `404 Not Found` response or a `200 OK` response with an empty array if there are no attendants.
  */
 function getAttendants($uri, $matches, $params)
 {
@@ -71,7 +77,10 @@ function getAttendants($uri, $matches, $params)
 }
 
 /**
- * @TODO: documentation
+ * Handles `GET` requests made to `/attendants/:id`.
+ * Attempts to get the attendant with the given ID.
+ * If successful, emits a `200 OK` response with the attendant data (excluding confidential info).
+ * If unsuccessful, emits a `404 Not Found` response.
  */
 function getAttendant($uri, $matches, $params)
 {
@@ -82,13 +91,16 @@ function getAttendant($uri, $matches, $params)
   }
 
   // Remove confidential information before returning the attendant.
-  // unset($attendant['password']);
-  // unset($attendant['resetCode']);
+  unset($attendant['password']);
+  unset($attendant['resetCode']);
   success($attendant);
 }
 
 /**
- * @TODO: documentation
+ * Handles `GET` requests made to `/attendants/:id/lots`.
+ * Attempts to get all lots of the attendant with the given ID.
+ * If successful, emits a `200 OK` response with the lots data (excluding confidential info).
+ * If unsuccessful, emits a `404 Not Found` response or a `200 OK` response with an empty array if there are no lots.
  */
 function getAttendantLots($uri, $matches, $params)
 {
@@ -107,7 +119,10 @@ function getAttendantLots($uri, $matches, $params)
 }
 
 /**
- * @TODO: documentation
+ * Handles `GET` requests made to `/attendants/:id/reset_password`.
+ * Attempts to send an email to the attendant with the given ID including their password reset code.
+ * If successful, emits a `200 OK` response.
+ * If unsuccessful, emits a `404 Not Found` or `500 Internal Server Error` response.
  */
 function emailAttendantResetCode($uri, $matches, $params)
 {
@@ -144,7 +159,10 @@ function emailAttendantResetCode($uri, $matches, $params)
 }
 
 /**
- * @TODO: documentation
+ * Handles `PATCH` requests made to `/attendants/:id/reset_password`. Requires three keys in `$params`: email, resetCode, and password.
+ * Attempts to reset the password of the attendant with the given ID.
+ * If successful, emits a `200 OK` response.
+ * If unsuccessful, emits a `400 Bad Request`, `401 Unauthorized`, `404 Not Found` or `500 Internal Server Error` response.
  */
 function resetAttendantPassword($uri, $matches, $params)
 {
@@ -165,7 +183,7 @@ function resetAttendantPassword($uri, $matches, $params)
   }
 
   try {
-    // Update the password...
+    // Replace the old password with the hash of the given new password.
     $statement = $dbh->prepare(
       'UPDATE Attendants 
         SET password = :password 
@@ -176,7 +194,7 @@ function resetAttendantPassword($uri, $matches, $params)
       ':id' => $id
     ]);
 
-    // Clear the reset code...
+    // Clear the reset code so that it can only be used once.
     $statement = $dbh->prepare(
       'UPDATE Attendants 
         SET resetCode = :resetCode 
@@ -194,9 +212,6 @@ function resetAttendantPassword($uri, $matches, $params)
   }
 }
 
-/**
- * @TODO: documentation
- */
 function getAttendantByEmail($email)
 {
   global $dbh;
