@@ -30,7 +30,7 @@ $routes = [
   initRoute("GET", "#^/attendants/(\w+)/?(\?.*)?$#", "getAttendant"),
   initRoute("GET", "#^/attendants/(\w+)/lots/?(\?.*)?$#", "getAttendantLots"),
   initRoute("GET", "#^/attendants/(\w+)/reset_password/?(\?.*)?$#", "emailAttendantResetCode"),
-  initRoute("POST", "#^/attendants/(\w+)/reset_password/?(\?.*)?$#", "resetAttendantPassword"),
+  initRoute("PATCH", "#^/attendants/(\w+)/reset_password/?(\?.*)?$#", "resetAttendantPassword"),
   // Lots routes...
   // addLot
   // getLots
