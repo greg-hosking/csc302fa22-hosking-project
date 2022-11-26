@@ -1,4 +1,6 @@
 <?php
+require_once 'http-utils.php';
+
 $dbh = initPDO();
 
 /**
@@ -77,7 +79,7 @@ function initTables()
     );
 
   } catch (PDOException $ex) {
-    error($ex);
+    error("Error in initTables: $ex");
   }
 }
 
@@ -97,58 +99,55 @@ function dropTables()
     $dbh->exec('DROP TABLE IF EXISTS Lot_Payment_Methods');
 
   } catch (PDOException $ex) {
-    error($ex);
+    error("Error in dropTables: $ex");
   }
 }
 
 /**
  * Attempts to get all the rows from the given `$table`.
- * If successful, emits a `200 OK` respone including the table rows.
- * If unsuccessful, emits a `404 Not Found` or `500 Internal Error` reponse.
+ * If successful, returns an array containing all rows from the table.
+ * If unsuccessful, returns null.
  */
-function getTable($table)
+function getTableRows($table)
 {
   global $dbh;
 
   try {
-    $statement = $dbh->prepare("select * from :table");
-    $statement->execute([':table' => $table]);
-    // fetchAll returns false if there is no table with the given name.
+    $statement = $dbh->prepare("SELECT * FROM $table");
+    $statement->execute();
+    // fetchAll returns an empty array if there is no table with the given name.
     $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
-    if ($rows) {
-      success($rows);
+    if (count($rows) > 0) {
+      return $rows;
     }
-    notFound("Could not find table $table.");
+    return null;
 
   } catch (PDOException $ex) {
-    error($ex);
+    error("Error in getTable: $ex");
   }
 }
 
 /**
  * Attempts to get the row from the given `$table` with the given `$id`.
- * If successful, emits a `200 OK` respone including the table row.
- * If unsuccessful, emits a `404 Not Found` or `500 Internal Error` reponse. 
+ * If successful, returns the row from the table.
+ * If unsuccessful, returns null. 
  */
 function getTableRow($table, $id)
 {
   global $dbh;
 
   try {
-    $statement = $dbh->prepare("select * from :table where id = :id");
-    $statement->execute([
-      ':table' => $table,
-      ':id' => $id
-    ]);
+    $statement = $dbh->prepare("SELECT * FROM $table WHERE id = :id");
+    $statement->execute([':id' => $id]);
     // fetch returns false if there is no row with the given ID.
     $row = $statement->fetch(PDO::FETCH_ASSOC);
     if ($row) {
-      success($row);
+      return $row;
     }
-    notFound("Could not find row with ID $id in $table.");
+    return null;
 
   } catch (PDOException $ex) {
-    error($ex);
+    error("Error in getTableRow: $ex");
   }
 }
 ?>
