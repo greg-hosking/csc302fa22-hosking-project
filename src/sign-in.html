@@ -55,17 +55,30 @@
           },
           // If unsuccessful, it is likely because the given email and password
           // do not match or there is no account that exists with the given email.
-          error: () => {
-            showWarning();
+          error: (response) => {
+            if (response.status === 401) {
+              showInvalidSignInWarning();
+            } else if (response.status === 404) {
+              showAccountNotExistsWarning();
+            }
           },
         });
       }
 
-      function showWarning() {
+      function showAccountNotExistsWarning() {
+        $('#account-not-exists-warning').removeClass('d-none');
+      }
+
+      function showInvalidSignInWarning() {
         $('#invalid-sign-in-warning').removeClass('d-none');
       }
 
-      function hideWarning() {
+      function hideInvalidSignInWarning() {
+        $('#invalid-sign-in-warning').addClass('d-none');
+      }
+
+      function hideWarnings() {
+        $('#account-not-exists-warning').addClass('d-none');
         $('#invalid-sign-in-warning').addClass('d-none');
       }
     </script>
@@ -106,7 +119,7 @@
                       required
                       id="email-input"
                       class="form-control"
-                      oninput="hideWarning()"
+                      oninput="hideWarnings()"
                     />
                   </div>
                 </div>
@@ -120,13 +133,20 @@
                       required
                       id="password-input"
                       class="form-control"
-                      oninput="hideWarning()"
+                      oninput="hideInvalidSignInWarning()"
                     />
                   </div>
                 </div>
               </div>
               <div class="row mb-2">
-                <div class="col-6">
+                <div class="col-8">
+                  <p
+                    id="account-not-exists-warning"
+                    class="d-none text-danger mb-0"
+                  >
+                    Could not find an account with that email address!
+                    <a href="/src/sign-up.html">Sign up.</a>
+                  </p>
                   <p
                     id="invalid-sign-in-warning"
                     class="d-none text-danger mb-0"
@@ -134,7 +154,7 @@
                     Incorrect email or password.
                   </p>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-4 text-end">
                   <a href="/src/forgot-password.html">Forgot password?</a>
                 </div>
               </div>
