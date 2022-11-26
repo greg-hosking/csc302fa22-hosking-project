@@ -6,9 +6,9 @@ $dbh = initPDO();
 
 /**
  * Handles `POST` requests made to `/attendants`. Requires two keys in `$params`: email and password.
- * Attempts to create a user with the given `email` and `password`.
- * If successful, emites a `201 Created` response with the location of the created user.
- * If unsuccessful, emits a `400 Bad Request` or `404 Not Found` response.
+ * Attempts to create an attendant with the given `email` and `password`.
+ * If successful, emites a `201 Created` response with the location of the created attendant.
+ * If unsuccessful, emits a `400 Bad Request` or `500 Internal Server Error` response.
  */
 function addAttendant($uri, $matches, $params)
 {
