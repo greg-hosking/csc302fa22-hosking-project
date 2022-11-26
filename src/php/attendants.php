@@ -132,14 +132,11 @@ function emailAttendantResetCode($uri, $matches, $params)
     ]);
 
     $email = $attendant['email'];
-    // TODO: figure out how to send an email
-    // mail(
-    //   $email,
-    //   'Reset Your Open Spots Password',
-    //   "Hello $email, here is your password reset code: $resetCode."
-    // );
-
-    success();
+    // TODO: send email to given email including the reset code...
+    //       for now, send the reset code back in the response.
+    success([
+      "resetCode" => $resetCode
+    ]);
 
   } catch (PDOException $ex) {
     error("Error in emailAttendantResetCode: $ex");
