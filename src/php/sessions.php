@@ -19,13 +19,13 @@ function signIn($uri, $matches, $params)
 
   $attendant = getAttendantByEmail($params['email']);
   if (is_null($attendant)) {
-    notFound('Could not find an account with that email address');
+    notFound('Could not find an account with that email address.');
   }
 
   if (password_verify($params['password'], $attendant['password'])) {
     $_SESSION['id'] = $attendant['id'];
     $_SESSION['email'] = $params['email'];
-    $_SESSION['signed_in'] = true;
+    $_SESSION['signedIn'] = true;
 
     success();
   }
@@ -45,7 +45,7 @@ function signOut($uri, $matches, $params)
 
 function requireSignedIn()
 {
-  if (!key_exists('signed_in', $_SESSION) && $_SESSION['signed_in']) {
+  if (!key_exists('signedIn', $_SESSION) && $_SESSION['signedIn']) {
     forbidden('You must be signed in to perform that action.');
   }
 }
