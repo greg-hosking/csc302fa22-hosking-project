@@ -46,7 +46,7 @@
           return;
         }
 
-        // Attempt to sign the user up with the provided credentials.
+        // Attempt to sign the user up with the given credentials.
         $.ajax('/attendants', {
           method: 'POST',
           data: {
@@ -58,7 +58,7 @@
             window.location = '/src/sign-in.html';
           },
           // If unsuccessful, it is likely because an account already exists
-          // with the provided email. Either way, show a warning.
+          // with the given email. Either way, show a warning.
           error: () => {
             showAccountExistsWarning();
           },
@@ -120,21 +120,20 @@
             <form id="sign-up-form" onsubmit="attemptSignUp(event)">
               <div class="row">
                 <div class="col">
-                  <div class="form-group">
+                  <div class="mb-2">
                     <label for="email-input">Email address</label>
                     <input
                       type="email"
                       required
                       id="email-input"
                       class="form-control"
-                      oninput="hideAccountExistsWarning()"
                     />
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col">
-                  <div class="form-group">
+                  <div class="mb-2">
                     <label for="password-input">Password</label>
                     <input
                       type="password"
@@ -148,7 +147,7 @@
               </div>
               <div class="row">
                 <div class="col">
-                  <div class="form-group" style="margin-bottom: 0.5rem">
+                  <div class="mb-2">
                     <label for="confirm-password-input">Confirm password</label>
                     <input
                       type="password"

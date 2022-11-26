@@ -39,7 +39,7 @@
         const email = $('#email-input').val();
         const password = $('#password-input').val();
 
-        // Attempt to sign the user in with the provided credentials.
+        // Attempt to sign the user in with the given credentials.
         $.ajax('/sessions', {
           method: 'POST',
           data: {
@@ -53,8 +53,8 @@
             sessionStorage.setItem('signedIn', 'true');
             window.location = '/src/your-parking-lots.html';
           },
-          // If unsuccessful, it is likely because the provided email and password
-          // do not match or there is no account that exists with the provided email.
+          // If unsuccessful, it is likely because the given email and password
+          // do not match or there is no account that exists with the given email.
           error: () => {
             showWarning();
           },
@@ -99,7 +99,7 @@
             <form onsubmit="attemptSignIn(event)">
               <div class="row">
                 <div class="col">
-                  <div class="form-group">
+                  <div class="mb-2">
                     <label for="email-input">Email address</label>
                     <input
                       type="email"
@@ -113,7 +113,7 @@
               </div>
               <div class="row">
                 <div class="col">
-                  <div class="form-group" style="margin-bottom: 0.5rem">
+                  <div class="mb-2">
                     <label for="password-input">Password</label>
                     <input
                       type="password"
