@@ -171,7 +171,8 @@ function initMockData()
         ("vladimirrobert@example.com", :password),
         ("manusyakiv@example.com", :password),
         ("mordechaisvit@example.com", :password),
-        ("nuralorri@example.com", :password)'
+        ("nuralorri@example.com", :password),
+        ("henrietteroi@exmaple.com", :password)'
     );
     $statement->execute([':password' => $password]);
 
