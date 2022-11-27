@@ -231,7 +231,6 @@ function initMockData()
         (3, "Apple Pay")'
     );
 
-
   } catch (PDOException $ex) {
     error("Error in initMockData: $ex");
   }
