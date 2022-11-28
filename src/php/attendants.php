@@ -1,7 +1,6 @@
 <?php
 require_once 'db-utils.php';
 require_once 'http-utils.php';
-require_once 'lots.php';
 
 $dbh = initPDO();
 
@@ -95,50 +94,6 @@ function getAttendant($uri, $matches, $params)
   unset($attendant['password']);
   unset($attendant['resetCode']);
   success($attendant);
-}
-
-/**
- * Handles `GET` requests made to `/attendants/:id/lots`.
- * Attempts to get all lots of the attendant with the given ID.
- * If successful, emits a `200 OK` response with the lots data.
- * If unsuccessful, emits a `404 Not Found` or `500 Internal Server Error` response or a `200 OK` response with an empty array if there are no lots.
- */
-function getAttendantLots($uri, $matches, $params)
-{
-  global $dbh;
-  $id = $matches[1];
-
-  $attendant = getTableRow('Attendants', $id);
-  if (is_null($attendant)) {
-    notFound('Could not find an account with that ID.');
-  }
-
-  try {
-    $statement = $dbh->prepare(
-      'SELECT 
-        Lots.id as id, address, latitude, longitude, capacity, vacancies, flatRate, hourlyRate
-        FROM Lot_Attendants
-        INNER JOIN Lots
-        ON Lot_Attendants.lotID = Lots.id
-        INNER JOIN Attendants
-        ON Lot_Attendants.attendantID = Attendants.id
-        WHERE Attendants.id = :id'
-    );
-    $statement->execute([':id' => $id]);
-
-    $lots = $statement->fetchAll(PDO::FETCH_ASSOC);
-    // Each of these lots only contains the data in the Lots table. Each of the
-    // lots should be expanded further with data from the related tables.
-    $lotsExpanded = array();
-    foreach ($lots as $lot) {
-      array_push($lotsExpanded, getExpandedLot($lot));
-    }
-
-    success($lotsExpanded);
-
-  } catch (PDOException $ex) {
-    error("Error in getAttendantLots: $ex");
-  }
 }
 
 /**
