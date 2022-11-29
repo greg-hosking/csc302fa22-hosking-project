@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign In | Open Spots</title>
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
     <!-- Add Bootstrap styles -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
@@ -12,7 +13,7 @@
       integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     />
-    <script src="/src/js/map-utils.js"></script>
+    <script src="./js/map-utils.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
   </head>
   <body>
@@ -27,7 +28,7 @@
           sessionSignedIn !== null &&
           sessionSignedIn == 'true'
         ) {
-          window.location = '/src/your-parking-lots.html';
+          window.location = './your-parking-lots.html';
         }
       });
 
@@ -51,7 +52,7 @@
           success: () => {
             sessionStorage.setItem('email', email);
             sessionStorage.setItem('signedIn', 'true');
-            window.location = '/src/your-parking-lots.html';
+            window.location = './your-parking-lots.html';
           },
           // If unsuccessful, it is likely because the given email and password
           // do not match or there is no account that exists with the given email.
@@ -85,7 +86,7 @@
 
     <!-- Navbar -->
     <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-primary px-4">
-      <a class="navbar-brand" href="/src">Open Spots</a>
+      <a class="navbar-brand" href="./">Open Spots</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -145,7 +146,7 @@
                     class="d-none text-danger mb-0"
                   >
                     Could not find an account with that email address!
-                    <a href="/src/sign-up.html">Sign up.</a>
+                    <a href="./sign-up.html">Sign up.</a>
                   </p>
                   <p
                     id="invalid-sign-in-warning"
@@ -155,7 +156,7 @@
                   </p>
                 </div>
                 <div class="col-4 text-end">
-                  <a href="/src/forgot-password.html">Forgot password?</a>
+                  <a href="./forgot-password.html">Forgot password?</a>
                 </div>
               </div>
               <div class="row mb-2">
@@ -170,7 +171,7 @@
               <div class="col">
                 <p>
                   Don't have an account?
-                  <a href="/src/sign-up.html">Sign up.</a>
+                  <a href="./sign-up.html">Sign up.</a>
                 </p>
               </div>
             </div>

@@ -86,7 +86,7 @@ function getCurrentAddress() {
           position.coords.latitude,
           position.coords.longitude
         ),
-        icon: 'src/assets/blue_marker.png',
+        icon: '../assets/blue_marker.png',
         animation: google.maps.Animation.DROP,
       });
       marker.setMap(map);

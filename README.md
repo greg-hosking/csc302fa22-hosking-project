@@ -4,9 +4,10 @@
 This project is a web application that allows parking lot attendants to manage and provide information about their parking lot(s) to users looking for parking in the area.
 
 <b>Live Website</b><br>
-View the website live on DigDug here: <a href="https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project/src/">https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project/src/</a> 
+View the website live on DigDug here: <a href="https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project./">https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project./</a>
 
 <b>Files</b><br>
+
 - `diagrams.pdf` contains ER models and wireframes,
 - `src/index.html` is the home HTML file that has the front end for the prototype,
 - `src/rest-utils.php` has some utility functions for the back end,
@@ -14,6 +15,7 @@ View the website live on DigDug here: <a href="https://digdug.cs.endicott.edu/~g
 - `src/data.db` is the SQLite database file
 
 <b>Features</b><br>
+
 - Account management (25%),
 - Authentication (0%),
 - Parking lot management (25%),
@@ -21,7 +23,8 @@ View the website live on DigDug here: <a href="https://digdug.cs.endicott.edu/~g
 
 <b>API</b><br>
 Here is a list of currently supported API endpoints:
+
 - `GET /lots` -> list of all parking lots
 
 <b>Data Model</b><br>
-See diagrams.pdf for a detailed ER model. The data in the diagram (attendants, lots, lot attendants, etc) will be stored in an SQLite database on the server. Data that will be maintained on the client side includes auth tokens (in session/local storage) and user preferences (last entered address, etc) (in local storage). 
+See diagrams.pdf for a detailed ER model. The data in the diagram (attendants, lots, lot attendants, etc) will be stored in an SQLite database on the server. Data that will be maintained on the client side includes auth tokens (in session/local storage) and user preferences (last entered address, etc) (in local storage).
