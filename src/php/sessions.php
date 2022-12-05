@@ -45,8 +45,32 @@ function signOut($uri, $matches, $params)
 
 function requireSignedIn()
 {
-  if (!key_exists('signedIn', $_SESSION) && $_SESSION['signedIn']) {
+  if (!(key_exists('signedIn', $_SESSION) && $_SESSION['signedIn'])) {
     forbidden('You must be signed in to perform that action.');
+  }
+}
+
+function requireSignedInLotAttendant($lotID)
+{
+  global $dbh;
+
+  requireSignedIn();
+
+  try {
+    // Make sure that the signed in attendant is an attendant for the given lot.
+    $statement = $dbh->prepare(
+      'SELECT * FROM Lot_Attendants
+          WHERE lotID = :lotID AND attendantID = :attendantID'
+    );
+    $statement->execute([
+      ':lotID' => $lotID,
+      ':attendantID' => $_SESSION['id']
+    ]);
+    if (count($statement->fetchAll(PDO::FETCH_ASSOC)) == 0) {
+      forbidden('You must be an attendant for this lot to perform that action.');
+    }
+  } catch (PDOException $ex) {
+    error("Error in requireSignedInLotAttendant: $ex");
   }
 }
 ?>
