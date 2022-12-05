@@ -17,9 +17,9 @@ if (file_exists('.' . $_SERVER['REQUEST_URI'])) {
 session_start();
 header('Content-type: application/json');
 
-dropTables();
+// dropTables();
 initTables();
-initMockData();
+// initMockData();
 
 $routes = [
   // Sessions routes...
@@ -27,19 +27,20 @@ $routes = [
   initRoute("DELETE", "#^/sessions/?(\?.*)?$#", "signOut"),
   // Attendants routes...
   initRoute("POST", "#^/attendants/?(\?.*)?$#", "addAttendant"),
-  initRoute("GET", "#^/attendants/?(\?.*)?$#", "getAttendants"),
-  initRoute("GET", "#^/attendants/(\w+)/?(\?.*)?$#", "getAttendant"),
+  // initRoute("GET", "#^/attendants/?(\?.*)?$#", "getAttendants"), // For testing...
+  // initRoute("GET", "#^/attendants/(\w+)/?(\?.*)?$#", "getAttendant"), // For testing...
   initRoute("GET", "#^/attendants/(\w+)/reset_password/?(\?.*)?$#", "emailAttendantResetCode"),
   initRoute("PATCH", "#^/attendants/(\w+)/reset_password/?(\?.*)?$#", "resetAttendantPassword"),
   // Lots routes...
   initRoute("POST", "#^/attendants/(\w+)/lots/?(\?.*)?$#", "addAttendantLot"),
   initRoute("GET", "#^/attendants/(\w+)/lots/?(\?.*)?$#", "getAttendantLots"),
   initRoute("GET", "#^/lots/?(\?.*)?$#", "getLots"),
-  initRoute("GET", "#^/lots/(\w+)/?(\?.*)?$#", "getLot"),
+  // initRoute("GET", "#^/lots/(\w+)/?(\?.*)?$#", "getLot"), // For testing...
   initRoute("PUT", "#^/lots/(\w+)/?(\?.*)?$#", "updateLot"),
   initRoute("POST", "#^/lots/(\w+)/increment_vacancies/?(\?.*)?$#", "incrementLotVacancies"),
   initRoute("POST", "#^/lots/(\w+)/decrement_vacancies/?(\?.*)?$#", "decrementLotVacancies"),
   initRoute("POST", "#^/lots/(\w+)/attendants/?(\?.*)?$#", "addLotAttendant"),
+  initRoute("POST", "#^/lots/(\w+)/attendants/?(\?.*)?$#", "getLotAttendants"),
   initRoute("DELETE", "#^/lots/(\w+)/attendants/?(\?.*)?$#", "deleteLotAttendant"),
 ];
 
