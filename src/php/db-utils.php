@@ -41,13 +41,14 @@ function initTables()
     $dbh->exec(
       'CREATE TABLE IF NOT EXISTS Lots (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
         address TEXT NOT NULL,
         latitude REAL NOT NULL,
         longitude REAL NOT NULL,
         capacity INTEGER NOT NULL,
         vacancies INTEGER NOT NULL,
-        flatRate REAL,
-        hourlyRate REAL)'
+        flatRate REAL DEFAULT 0 CHECK (flatRate >= 0),
+        hourlyRate REAL DEFAULT 0 CHECK (hourlyRate >= 0))'
     );
 
     // Lot Attendants...
@@ -65,7 +66,7 @@ function initTables()
       'CREATE TABLE IF NOT EXISTS Lot_Hours (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         lotID INTEGER,
-        day INTEGER NOT NULL,
+        day INTEGER NOT NULL CHECK (day >= 1 AND day <= 7),
         openTime TEXT NOT NULL,
         closeTime TEXT NOT NULL,
         FOREIGN KEY (lotID) REFERENCES Lots (id))'
@@ -177,11 +178,11 @@ function initMockData()
     $statement->execute([':password' => $password]);
 
     $dbh->exec(
-      'INSERT INTO Lots (address, latitude, longitude, capacity, vacancies, flatRate, hourlyRate)
+      'INSERT INTO Lots (name, address, latitude, longitude, capacity, vacancies, flatRate, hourlyRate)
         VALUES 
-        ("746 Rosewood Ct, Faribault, MN 55021", 44.271680, -93.264140, 42, 14, 20, 5),
-        ("2373 Gandy St, St. Louis, MO 63101", 38.630940, -90.192860, 82, 29, 30, 4),
-        ("4621 James Ave, Wichita, KS 67214", 37.693700, -97.300350, 35, 23, 40, 6.5)'
+        ("Rosewood Lot", "746 Rosewood Ct, Faribault, MN 55021", 44.271680, -93.264140, 42, 14, 20, 5),
+        ("Middle of Nowhere Lot", "2373 Gandy St, St. Louis, MO 63101", 38.630940, -90.192860, 82, 29, 30, 4),
+        ("Wichita Parking Garage", "4621 James Ave, Wichita, KS 67214", 37.693700, -97.300350, 35, 23, 40, 6.5)'
     );
 
     $dbh->exec(
