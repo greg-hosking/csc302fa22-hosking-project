@@ -20,15 +20,17 @@
     <script>
       $(document).ready(() => {
         // If the user is signed in, navigate to the parking lot management page.
+        const sessionID = sessionStorage.getItem('id');
         const sessionEmail = sessionStorage.getItem('email');
         const sessionSignedIn = sessionStorage.getItem('signedIn');
 
         if (
+          sessionID !== null &&
           sessionEmail !== null &&
           sessionSignedIn !== null &&
           sessionSignedIn == 'true'
         ) {
-          window.location = './your-parking-lots.html';
+          window.location = './parking.html';
         }
       });
 
@@ -49,7 +51,8 @@
           },
           // If successful, save the email and signed in status to session storage
           // and navigate to the parking lot management page.
-          success: () => {
+          success: (response) => {
+            sessionStorage.setItem('id', response.data.id);
             sessionStorage.setItem('email', email);
             sessionStorage.setItem('signedIn', 'true');
             window.location = './your-parking-lots.html';
