@@ -19,10 +19,15 @@
   <body>
     <script>
       $(document).ready(() => {
+        const sessionID = sessionStorage.getItem('id');
         const sessionEmail = sessionStorage.getItem('email');
         const sessionSignedIn = sessionStorage.getItem('signedIn');
+        let getLotsURL;
 
+        // If the user is signed in, request all of their lots from the API.
+        // Otherwise, request all lots.
         if (
+          sessionID !== null &&
           sessionEmail !== null &&
           sessionSignedIn !== null &&
           sessionSignedIn == 'true'
@@ -30,11 +35,234 @@
           $('#your-parking-lots-link').removeClass('d-none');
           $('#sign-out-link').removeClass('d-none');
           $('#sign-in-link').addClass('d-none');
+          getLotsURL = '/attendants/' + sessionID + '/lots';
         } else {
           $('#your-parking-lots-link').addClass('d-none');
           $('#sign-out-link').addClass('d-none');
           $('#sign-in-link').removeClass('d-none');
+          getLotsURL = '/lots';
         }
+
+        // Get the latitude and longitude of the address saved in sessionStorage.
+        const latitude = sessionStorage.getItem('latitude');
+        const longitude = sessionStorage.getItem('longitude');
+        if (latitude !== null && longitude !== null) {
+          let marker = new google.maps.Marker({
+            position: new google.maps.LatLng(latitude, longitude),
+            icon: '/assets/blue_marker.png',
+            animation: google.maps.Animation.DROP,
+          });
+          marker.setMap(map);
+          map.setCenter(marker.getPosition());
+          map.setZoom(15);
+        }
+
+        let lots;
+        $.ajax(getLotsURL, {
+          method: 'GET',
+          success: (response) => {
+            lots = response.data;
+            response.data.forEach((lot) => {
+              // Clone the template for the lot info card and unhide it.
+              const $template = $('#lot-info-card-template');
+              const $infoCard = $template
+                .clone()
+                .prop('id', 'lot-info-card-' + lot.id);
+              $infoCard.removeClass('d-none');
+
+              $infoCard.find('.lot-info-card-name').text(lot.name);
+
+              // Omit the zip code of the address on the info card.
+              let addressArr = lot.address.split(' ');
+              addressArr.pop();
+              $infoCard
+                .find('.lot-info-card-address')
+                .text(addressArr.join(' '));
+
+              // Format the vacancies so that high vacancies is colored green,
+              // medium vacancies is colored yellow, and low vacancies is colored red.
+              const $infoCardVacancies = $infoCard.find(
+                '.lot-info-card-vacancies'
+              );
+              $infoCardVacancies.text(
+                lot.vacancies + ' open spots of ' + lot.capacity
+              );
+              const percentOccupied =
+                (lot.capacity - lot.vacancies) / lot.capacity;
+              let colorClass;
+              if (percentOccupied <= 0.5) {
+                colorClass = 'text-success';
+              } else if (percentOccupied <= 0.8) {
+                colorClass = 'text-warning';
+              } else {
+                colorClass = 'text-danger';
+              }
+              $infoCardVacancies.addClass(colorClass);
+
+              // Format the hours so that, if the lot is currently open it shows
+              // what time the lot will close, otherwise it shows what time the
+              // lot will open.
+              const $infoCardHours = $infoCard.find('.lot-info-card-hours');
+              const date = new Date();
+              let currDay = date.getDay();
+              const currHours = date.getHours();
+              const currMinutes = date.getMinutes();
+              // getDay() returns a number 0 to 6, where Sunday is 0. The data
+              // from the server uses 1 to 7, where Sunday is 7. Adjusts the result
+              // from getDay() to match this.
+              if (currDay === 0) {
+                currDay = 7;
+              }
+
+              // Get the hours for the current day. If there are no hours for
+              // the current day, then openTime and closeTime will be undefined.
+              let openTime, closeTime;
+              lot.hours.forEach((dayHours) => {
+                if (dayHours.day === currDay) {
+                  openTime = dayHours.openTime;
+                  closeTime = dayHours.closeTime;
+                }
+              });
+              // If the current hours or minutes are one digit, pad with a leading zero.
+              let currTime = '';
+              if (currHours < 10) {
+                currTime += '0';
+              }
+              currTime += currHours + ':';
+              if (currMinutes < 10) {
+                currTime += '0';
+              }
+              currTime += currMinutes;
+
+              // If the lot is closed, find the next time it will be open.
+              if (
+                !(openTime && closeTime) ||
+                !(currTime >= openTime && currTime < closeTime)
+              ) {
+                let nextOpenDay = currDay;
+                let nextOpenTime;
+                do {
+                  lot.hours.forEach((dayHours) => {
+                    if (dayHours.day === nextOpenDay && !nextOpenTime) {
+                      nextOpenTime = dayHours.openTime;
+                    }
+                  });
+                  if (!nextOpenTime) {
+                    nextOpenDay = (nextOpenDay % 7) + 1;
+                  }
+                } while (nextOpenDay !== currDay && !nextOpenTime);
+
+                // If the next time that the lot is open could not be found,
+                // then the lot is permanently closed.
+                if (!nextOpenTime) {
+                  $infoCardHours.text('Permanently closed!');
+                } else {
+                  const days = [
+                    'Mon',
+                    'Tue',
+                    'Wed',
+                    'Thu',
+                    'Fri',
+                    'Sat',
+                    'Sun',
+                  ];
+                  $infoCardHours.text(
+                    'Closed · Opens ' +
+                      formatTime(nextOpenTime) +
+                      ' ' +
+                      days[nextOpenDay - 1]
+                  );
+                }
+                $infoCardHours.addClass('text-danger');
+              }
+              // If the lot is open, find out if it closes soon.
+              else {
+                let timeIn1Hr = currHours + 1 + ':' + currMinutes;
+                if (timeIn1Hr > '23:59') {
+                  timeIn1Hr = '23:59';
+                }
+
+                if (timeIn1Hr >= closeTime) {
+                  $infoCardHours.text(
+                    'Closing soon · ' +
+                      formatTime(openTime) +
+                      '-' +
+                      formatTime(closeTime)
+                  );
+                  $infoCardHours.addClass('text-warning');
+                } else {
+                  $infoCardHours.text('Open · Closes ' + formatTime(closeTime));
+                  $infoCardHours.addClass('text-success');
+                }
+              }
+
+              // Insert the info card into the list.
+              $template.after($infoCard);
+
+              // Put a marker on the map for the lot (with the same colors as above).
+              let markerColor;
+              if (percentOccupied <= 0.5) {
+                markerColor = 'green';
+              } else if (percentOccupied <= 0.8) {
+                markerColor = 'yellow';
+              } else {
+                markerColor = 'red';
+              }
+              const marker = new google.maps.Marker({
+                position: new google.maps.LatLng(lot.latitude, lot.longitude),
+                icon: '/assets/' + markerColor + '_marker.png',
+                animation: google.maps.Animation.DROP,
+              });
+              const infoWindow = new google.maps.InfoWindow({
+                content: $infoCard.html(),
+              });
+              // When the marker is clicked, center and zoom in on it, open the
+              // info window, and select the corresponding info card.
+              google.maps.event.addListener(marker, 'click', (event) => {
+                // map is declared in js/map-utils.js
+                map.setCenter(
+                  new google.maps.LatLng(event.latLng.lat(), event.latLng.lng())
+                );
+                map.setZoom(15);
+                infoWindow.open({
+                  anchor: marker,
+                  map,
+                });
+
+                $('.list-group-item').removeClass('list-group-item-primary');
+                let selectedItemID = 5;
+                $('.list-group-item').each((index, element) => {
+                  const id = element.id.split('-').pop();
+                  lots.forEach((lot) => {
+                    if (
+                      lot.id == id &&
+                      lot.latitude == event.latLng.lat() &&
+                      lot.longitude == event.latLng.lng()
+                    ) {
+                      selectedItemID = id;
+                    }
+                  });
+                });
+                $('#lot-info-card-' + selectedItemID).addClass(
+                  'list-group-item-primary'
+                );
+
+                // Show the tray
+                $('#lot-container').removeClass('col-md-3');
+                $('#lot-container').addClass('col-md-6');
+                $('#lot-tray').removeClass('d-none');
+                $('#map-container').removeClass('col-md-9');
+                $('#map-container').addClass('col-md-6');
+              });
+              marker.setMap(map);
+              // markers is declared in js/map-utils.js
+              markers.push(marker);
+            });
+          },
+          error: () => {
+            alert('Something went wrong on our end. Please try again later.');
+          },
+        });
       });
 
       function signOut() {
@@ -49,10 +277,26 @@
         sessionStorage.removeItem('email');
         sessionStorage.removeItem('signedIn');
       }
+
+      /**
+       * Convert 24-hour time to 12-hour time.
+       */
+      function formatTime(time) {
+        let hours = +time.split(':')[0];
+        const minutes = time.split(':')[1];
+        const period = hours < 12 ? 'AM' : 'PM';
+
+        if (hours === 0) {
+          hours = 12;
+        } else if (hours > 12) {
+          hours -= 12;
+        }
+        return hours + ':' + minutes + period;
+      }
     </script>
 
     <!-- Navbar -->
-    <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-primary px-4">
+    <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-primary px-4">
       <a class="navbar-brand" href="./">Open Spots</a>
       <button
         class="navbar-toggler"
@@ -94,17 +338,48 @@
     </nav>
 
     <div class="container-fluid">
-      <div class="row align-items-center" style="height: 100vh">
-        <div class="col-md-4 d-flex align-items-center">
-          <div class="container">
-            <div class="row">
-              <div class="col order-last order-md-first">
-                <h1>Parking</h1>
+      <div class="row" style="height: 100vh">
+        <!-- Left or bottom panel -->
+        <div id="lot-container" class="col-md-3 d-flex">
+          <div class="container-fluid p-0">
+            <div class="row m-0">
+              <div class="col order-last order-md-first p-0">
+                <!-- Empty div adjusts content to not overlap with navbar on large screens -->
+                <div class="d-none d-md-flex" style="margin-top: 56px"></div>
+                <div class="container-fluid p-0">
+                  <div class="row">
+                    <div class="col p-0">
+                      <ul
+                        class="list-group"
+                        style="border-radius: 0; height: 93vh; overflow-y: auto"
+                      >
+                        <li
+                          id="lot-info-card-template"
+                          class="list-group-item d-none"
+                        >
+                          <div class="p-2">
+                            <h5 class="lot-info-card-name"></h5>
+                            <p class="lot-info-card-address mb-0"></p>
+                            <p class="lot-info-card-vacancies mb-0"></p>
+                            <p class="lot-info-card-hours mb-0"></p>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                    <div id="lot-tray" class="col d-none">
+                      <h5>More lot info...</h5>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-8 order-first order-md-last h-100 p-0">
+        <!-- Right or top panel -->
+        <div
+          id="map-container"
+          class="col-md-9 order-first order-md-last h-100 p-0"
+        >
           <div id="map" class="h-100"></div>
         </div>
       </div>
