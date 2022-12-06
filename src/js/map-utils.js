@@ -1,4 +1,5 @@
 let map;
+let markers = [];
 
 /**
  *
