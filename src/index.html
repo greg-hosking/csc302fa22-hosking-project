@@ -19,10 +19,12 @@
   <body>
     <script>
       $(document).ready(() => {
+        const sessionID = sessionStorage.getItem('id');
         const sessionEmail = sessionStorage.getItem('email');
         const sessionSignedIn = sessionStorage.getItem('signedIn');
 
         if (
+          sessionID !== null &&
           sessionEmail !== null &&
           sessionSignedIn !== null &&
           sessionSignedIn == 'true'
@@ -35,6 +37,9 @@
           $('#sign-out-link').addClass('d-none');
           $('#sign-in-link').removeClass('d-none');
         }
+
+        // Once everything has loaded, prompt the user for their current address.
+        getCurrentAddress();
       });
 
       function signOut() {
@@ -77,8 +82,6 @@
       function hideWarning() {
         $('#invalid-address-warning').addClass('d-none');
       }
-
-      getCurrentAddress();
     </script>
 
     <!-- Navbar -->

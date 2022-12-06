@@ -27,7 +27,7 @@ function signIn($uri, $matches, $params)
     $_SESSION['email'] = $params['email'];
     $_SESSION['signedIn'] = true;
 
-    success();
+    success(['id' => $attendant['id']]);
   }
 
   unauthorized('Incorrect email or password.');
