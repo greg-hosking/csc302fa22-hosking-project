@@ -49,7 +49,6 @@ src
 │ ├─ red_marker.png
 │ ├─ green_marker.png
 │ ├─ yellow_marker.png
-│ ├─ orange_marker.png
 │ └─ favicon.ico
 ├─ js
 │ └─ map-utils.js (contains utility functions related to the Google Maps API)
@@ -63,11 +62,11 @@ src
 │ └─ data.db (is the SQLite database file)
 ├─ index.html
 ├─ sign-in.html
-├─ parking.html (is the page that displays all nearby parking lots)
+├─ parking.html (is the page that allows attendants to manage their parking lots and displays all nearby parking lots to guests)
 ├─ sign-up.html
 ├─ forgot-password.html
 ├─ reset-password.html
-└─ your-parking-lots.html (is the page that allows attendants to manage their parking lots)
+└─ your-parking-lots.html (is the page that )
 diagrams.pdf (contains entity-relationship models and wireframes)
 
 ```
