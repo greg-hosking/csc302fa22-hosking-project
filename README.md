@@ -4,9 +4,6 @@
 
 This project is a web application that allows parking lot attendants to manage and provide information about their parking lots to users looking for parking in the area.
 
-## Live Website
-
-Visit the website live on <a href="https://digdug.cs.endicott.edu/~ghosking/csc302fa22-hosking-project/src/">DigDug.</a>
 
 ## Features
 
@@ -14,9 +11,9 @@ Visit the website live on <a href="https://digdug.cs.endicott.edu/~ghosking/csc3
 | -------------------------------- | ------------- |
 | User account management          | ██████████ ✔️ |
 | User authentication              | ██████████ ✔️ |
-| Parking lot lookup by distance   | █████         |
-| Rendering of parking lots on map | █████         |
-| Parking lot management           | ███████       |
+| Parking lot lookup by distance   | ██████        |
+| Rendering of parking lots on map | ██████████ ✔️ |
+| Parking lot management           | █████████     |
 
 ## API
 
